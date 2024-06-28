@@ -1,5 +1,5 @@
 # my-app/Dockerfile
-FROM node:14 AS build
+FROM node AS build
 
 WORKDIR /app
 
