@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-pwa-local
+  labels:
+    app: my-pwa-local
+spec:
+  selector:
+    matchLabels:
+      app: my-pwa-local
+  template:
+    metadata:
+      labels:
+        app: my-pwa-local
+    spec:
+      containers:
+        - name: my-pwa-local
+          image: node:latest
+          imagePullPolicy: IfNotPresent
+          workingDir: /usr/src/app
+          command:
+            - "/bin/sh"
+            - "-c"
+          args:
+            - "npm i && CI=true npm start"
+          ports:
+            - name: http
+              containerPort: 3000
+          volumeMounts:
+            - mountPath: /usr/src/app
+              name: my-pwa-local
+      volumes:
+        - name: my-pwa-local
+          hostPath:
+            path: /projects/my-pwa
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-pwa-local-service
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: http
+  selector:
+    app: my-pwa-local
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: my-pwa-local-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 50g
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+spec:
+  rules:
+    - http:
+      paths:
+        - path: /my-pwa
+          backend:
+            serviceName: my-pwa-local-service
+            servicePort: 80
+        - path: /sockjs-node
+          backend:
+          serviceName: my-pwa-local-service
+          servicePort: 80
