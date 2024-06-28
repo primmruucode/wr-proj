@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: backend
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: backend
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: my-backend:latest
+        image: primmruuhub/back-end-wr:0.0.1
         ports:
         - containerPort: 5000
 ---
